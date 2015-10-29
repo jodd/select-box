@@ -1,0 +1,152 @@
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+// Colors
+text-color = #59514f
+bg-color = rgb(234,234,234)
+brown = #d1c6b8
+blue = #5badd6
+orange = #d17c15
+
+html
+    font-family Courier, Courier New, monospace
+    font-size 100%
+    line-height 1.5
+    color text-color
+    background-color bg-color
+
+body
+    margin 0 auto
+    padding 0 5%
+    max-width 900px
+
+select
+    height 2rem
+    .js &
+        opacity 0
+
+[role='listbox']
+    cursor default
+    display inline-table
+    position relative
+    // FF is buggy with outline and absolute position child
+    // http://stackoverflow.com/questions/10662902/css-outline-different-behavior-behavior-on-webkit-gecko
+    outline 0
+    white-space nowrap
+    height 2rem
+    vertical-align middle
+
+    &:before
+        content ""
+        position absolute
+        top 0
+        right 0
+        bottom 0
+        left 0
+        outline 0 solid alpha(orange, .2)
+        outline-offset 1.6rem
+        transition box-shadow .2s linear .1s,
+            outline-offset .3s ease-out,
+            outline-color .3s linear
+
+    > span
+        // height 100%
+        padding 0 2rem 0 .6rem
+        border 1px solid lighten(text-color, 30%)
+        border-radius 3px
+        box-sizing content-box
+        display table-cell
+        position relative
+        padding 0 2em 0 .6em
+        z-index 101
+        vertical-align middle
+        &:after
+            icon "▼"
+            position absolute
+            bottom 50%
+            transform translateY(50%)
+            right .5em
+
+    &:focus
+        &:before
+            box-shadow 0 0 6px alpha(orange, .8)
+            outline 4px solid transparent
+            outline-offset -1px
+
+        > span
+            border-color alpha(orange, .8)
+
+    > ul, > ol
+        border 1px solid darken(brown, 30%)
+        border-radius 2px
+        box-shadow 3px 3px 9px alpha(black, .3)
+        background-color brown
+        position absolute
+        top 0
+        left -.4em
+        // max-height 10em
+        overflow-y auto
+        margin 0
+        padding 0
+        list-style none
+        visibility hidden
+        opacity 0
+        transition visibility 0s linear .2s,
+            opacity .2s linear
+        z-index 100
+        &[aria-hidden='false']
+            visibility visible
+            opacity 1
+            transition-delay 0s
+            z-index 102
+
+    [role='separator']
+        font-style italic
+        font-weight bold
+        padding 0 .3em
+
+    [role='option']
+        position relative
+        padding 0 1em 0 1.2em
+        // line-height 1.2
+        outline 0
+        transition color .1s,
+            background-color .1s
+
+        &:before
+            icon "✓"
+            display none
+            position absolute
+            left .2em
+            bottom 50%
+            transform translateY(50%)
+
+        &[aria-selected='true']:before
+            display block
+
+        &:focus, &:hover
+            color black
+            background-color hsl(30, 90, 60)
+
+    [aria-selected='true']
+        color darken(orange, 20%)
+
+    &[aria-disabled='true']
+        > span
+            color lighten(text-color, 30%)
+            border-color lighten(text-color, 60%)
+        // &:focus
+        //     &:before
+        //         outline 0
+        //         box-shadow none
+        //     > span
+        //         border-color darkgrey
+
+    + select
+        visuallyhidden()
+
+
+
+
+

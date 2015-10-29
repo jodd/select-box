@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html class="no-js">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Exemple d'élément select personnalisé</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Elément SELECT personnalisé</h1>
+    </header>
+    <section>
+        <form>
+            <div>
+                <p><label for="select-1">Select box</label></p>
+                <select id="select-1" name="select-1">
+                    <option value="option-1">Option 1</option>
+                    <option value="option-2">Option 2</option>
+                    <option value="option-3">Option 3</option>
+                    <option value="foo">Foo</option>
+                    <option value="bar">Bar</option>
+                    <option value="baz">Baz</option>
+                </select>
+                <button>Disable</button>
+            </div>
+            <div>
+                <p><label for="select-2">Select box with groups</label></p>
+                <select id="select-2" name="select-2">
+                    <optgroup label="Group 1">
+                        <option value="option-1-1">Option 1.1</option>
+                        <option value="option-1-2">Option 1.2</option>
+                    </optgroup>
+                    <optgroup label="Group 2">
+                        <option value="option-2-1">Option 2.1</option>
+                        <option value="option-2-2">Option 2.2</option>
+                        <option value="option-2-3">Option 2.3</option>
+                    </optgroup>
+                </select>
+            </div>
+            <p><input type="submit" value="test"></p>
+        </form>
+    </section>
+
+    <script src="/jspm_packages/system.js"></script>
+    <script src="/config.js"></script>
+    <script>
+        System.import('./app');
+    </script>
+ <!--
+    <script src="build.js"></script>
+ -->
+</body>
+
+</html>
