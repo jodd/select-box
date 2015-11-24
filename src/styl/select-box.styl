@@ -136,12 +136,12 @@ select
         > span
             color lighten(text-color, 30%)
             border-color lighten(text-color, 60%)
-        // &:focus
-        //     &:before
-        //         outline 0
-        //         box-shadow none
-        //     > span
-        //         border-color darkgrey
+        &:focus
+            &:before
+                outline 0
+                box-shadow none
+            > span
+                border-color lighten(text-color, 60%)
 
     + select
         visuallyhidden()
