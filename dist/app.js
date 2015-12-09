@@ -4,7 +4,7 @@ import {SelectBox} from '../src/select-box.js';
 $(document).ready(() => {
 
     $('select').each((index, el) => {
-        var selectbox = new SelectBox(el);
+        const selectbox = new SelectBox(el);
 
         $(el).siblings('button').click(e => {
             e.preventDefault();
@@ -21,7 +21,9 @@ $(document).ready(() => {
 
     $('form').on('submit', e => {
         e.preventDefault();
-        window.alert($(e.target).serialize());
+        $('#test-result').html(
+            $(e.target).serialize().replace(/[^=]+=/, '').split(/&[^=]+=/).join('<br>')
+        );
     });
 
 });

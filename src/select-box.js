@@ -2,18 +2,29 @@
    SelectBox class definition
    ========================================================================== */
 import $ from 'jquery';
-import Modernizr from 'modernizr';
 
 /* Private
    ========================================================================== */
-var defaults = {
+const defaults = {
     keypressDelay: 1000,
     offset: -0.3
 };
 
+const namespace = 'listbox';
+const $W = $(window);
+const $D = $(document);
+
+// Alter the .on() jquery function to namespace events automatically.
+// TODO : Not sure if it's clean and/or safe, didnt find any resource about this technique. Need to dig into this.
+const jqueryOn = $.fn.on;
+$.fn.on = function(events, ...args) {
+    return jqueryOn.apply(this, [events.split(' ').join('.' + namespace + ' ') + '.' + namespace].concat(args));
+};
+
 /* _makeList ---------------------------------------------------------------- */
 function _makeList(tag, object) {
-    var list = document.createElement(tag), node, text;
+    const list = document.createElement(tag);
+    let node, text;
 
     list.setAttribute('aria-hidden', 'true');
 
@@ -52,13 +63,12 @@ constructor(element, options) {
     // original select element is no longer focusable
     this.el.setAttribute('tabindex', '-1');
 
-    // default state is closed
-    this.isOpen = false;
-
-    this.disabled = this.el.disabled;
-
+    this.isOpen = false; // default state is closed
+    this.touchmove = false;
     this.timer = 0;
     this.input = '';
+    
+    this.disabled = this.el.disabled;
 
     this.init();
 }
@@ -74,15 +84,8 @@ init() {
             'tabindex': this.el.disabled ? -1 : 0
         }).insertBefore(this.el)
         // provide some keyboard control
-        .on('keydown.listbox', this.onKeydown.bind(this))
-        .on('keypress.listbox', this.onKeypress.bind(this))
-        // default behavior support on touch devices
-        .on('click', e => {
-            if (Modernizr.touch && !this.disabled) {
-                e.stopPropagation();
-                this.el.focus();
-            }
-        });
+        .on('keydown', this.onKeydown.bind(this))
+        .on('keypress', this.onKeypress.bind(this));
 
     // create control element
     this.$control = $('<span>', {
@@ -97,7 +100,7 @@ init() {
     // cache links that stand for options
     this.$options = this.$list.children('[role="option"]')
         // always have only one option focused/hovered
-        .on('mouseover', e => { e.target.focus(); })
+        .on('mouseover', e => { e.target.focus() })
         .on('click', e => {
             this.update(this.$options.index(e.target));
             this.$box.focus();
@@ -112,110 +115,108 @@ init() {
     // cache items that stand for optgroups
     this.$optgroups = this.$list.children('[role="separator"]');
 
-    // click on label makes focus on listbox
-    $('label[for="' + this.el.id + '"]').click(e => {
-
-        if (Modernizr.touch)
-            return;
-
-        e.preventDefault();
-
-        if (!this.el.disabled)
+    // manage user click inside and outside the listbox
+    $D.on('click', e => {
+        
+        // click on label makes focus on listbox
+        if ($(e.target).closest('label[for="' + this.el.id + '"]').length && !this.el.disabled) {
+            e.preventDefault();
             this.$box.focus();
+        }
+
+        if ($(e.target).closest(this.$box).length && !this.el.disabled) {
+            this.toggle();
+        }
+        // close unless user clicked on group separator
+        else if (this.$optgroups.index(e.target) === -1) {
+            this.close();
+        }
     });
 
-    // manage user click inside and outside the listbox
-    $(document).on('click.listbox', e => {
-
-        if (e.target === this.$control[0] && !this.el.disabled)
-            this.toggle();
-
-        // close unless user clicked on group separator
-        else if (this.$optgroups.index(e.target) === -1)
-            this.close();
+    // Trigger native select menu on touch devices.
+    $W.on('touchmove', e => { this.touchmove = true });
+    $W.on('touchend', e => {
+        if (this.touchmove) {
+            this.touchmove = false;
+            return;
+        } else if ($(e.target).closest(this.$box).length && !this.el.disabled) {
+            e.preventDefault();
+            this.el.focus();
+        }
     });
 
     // alt + tab closes the box and move focus on itself
     // (rather than on the last focused option)
-    $(window).on('blur', e => {
-
-        if (this.isOpen)
-            this.close().$box.focus();
+    $W.on('blur', e => {
+        if (this.isOpen) {
+            this.close();
+            this.$box.focus();
+        }
     });
 
-    // Touch devices use the original select element
-    // provide back up changes on listbox
-    if (Modernizr.touch) {
-        $(this.el).on('change', e => {
-            this.update(e.target.selectedIndex);
-        });
-    }
+    // Update this listbox selected element when native element changes.
+    // (touch devices support)
+    $(this.el).on('change', e => {
+        this.update(e.target.selectedIndex);
+    });
 
-    return this.position();
+    this.position();
 
   }
 
 /* position ----------------------------------------------------------------- */
 position() {
 
-    var defaultTop = this.options.offset * this.$list.height();
-    var defaultOffset = this.$box.offset().top - $(window).scrollTop() + defaultTop;
-    var gap = Math.max(0, defaultOffset + this.$list.height() - $(window).height() + 30);
+    const defaultTop = this.options.offset * this.$list.height();
+    const defaultOffset = this.$box.offset().top - $W.scrollTop() + defaultTop;
+    const gap = Math.max(0, defaultOffset + this.$list.height() - $W.height() + 30);
 
     this.$list.css('top', defaultTop - gap);
-
-    return this;
 }
 
 /* open --------------------------------------------------------------------- */
 open() {
 
-    if (!this.isOpen) {
-        this.position();
-        this.$box.attr('aria-expanded', 'true');
-        this.$list.attr('aria-hidden', 'false');
-        this.$options.eq(this.el.selectedIndex).focus();
-        this.isOpen = true;
-    }
-
-    return this;
+    if (this.isOpen) { return; }
+    
+    this.position();
+    this.$box.attr('aria-expanded', 'true');
+    this.$list.attr('aria-hidden', 'false');
+    this.$options.eq(this.el.selectedIndex).focus();
+    this.isOpen = true;
 }
 
 /* close -------------------------------------------------------------------- */
 close() {
 
-    if (this.isOpen) {
-        this.$box.attr('aria-expanded', 'false');
-        this.$list.attr('aria-hidden', 'true');
-        this.isOpen = false;
-    }
-
-    return this;
+    if (!this.isOpen) { return; }
+    
+    this.$box.attr('aria-expanded', 'false');
+    this.$list.attr('aria-hidden', 'true');
+    this.isOpen = false;
 }
 
 /* toggle ------------------------------------------------------------------- */
 toggle() {
-    return this.isOpen ? this.close() : this.open();
+    this.isOpen ? this.close() : this.open();
 }
 
 /* update ------------------------------------------------------------------- */
 update(index) {
-    var $element = this.$options.eq(index);
+    const $element = this.$options.eq(index);
 
     this.$control.text($element.text());
     this.el.selectedIndex = index;
     this.$options.attr('aria-selected', 'false');
     $element.attr('aria-selected', 'true');
-
-    return this;
 }
 
 /* onKeydown ---------------------------------------------------------------- */
 onKeydown(e) {
 
-    if (this.disabled) return this;
+    if (this.disabled) return;
 
-    var index = this.isOpen ? this.$options.index(e.target) : this.el.selectedIndex;
+    let index = this.isOpen ? this.$options.index(e.target) : this.el.selectedIndex;
 
     switch (e.keyCode) {
 
@@ -227,8 +228,10 @@ onKeydown(e) {
         case 32: // SPACE
             e.preventDefault();
 
-            if (this.isOpen)
-              this.update(index).$box.focus();
+            if (this.isOpen) {
+                this.update(index);
+                this.$box.focus();
+            }
 
             this.toggle();
             break;
@@ -258,13 +261,12 @@ onKeydown(e) {
             break;
 
         case 27: // ESC
+            
             if (this.isOpen) {
                 this.close();
                 this.$box.focus();
             }
     }
-
-    return this;
 }
 
 /* onKeypress --------------------------------------------------------------- */
@@ -273,9 +275,10 @@ onKeypress(e) {
     if (!e.charCode || this.disabled)
         return this;
 
-    var key = String.fromCharCode(e.which),
-        elapsed = Date.now() - this.timer > this.options.keypressDelay,
-        i = elapsed ? this.el.selectedIndex : this.el.selectedIndex - 1,
+    const key = String.fromCharCode(e.which);
+    const elapsed = Date.now() - this.timer > this.options.keypressDelay;
+    
+    let i = elapsed ? this.el.selectedIndex : this.el.selectedIndex - 1,
         j = -1,
         $item;
 
@@ -301,8 +304,6 @@ onKeypress(e) {
                 return this.update(i);
         }
     }
-
-    return this;
 }
 
 /* enable ------------------------------------------------------------------- */
