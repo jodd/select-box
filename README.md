@@ -2,8 +2,8 @@
 
 Un script JS qui reproduit le comportement d'une liste déroulante.
 
-~~ TODO : revoir l'implémentation et notamment le comportement sur les appareils tactiles.
---> abandonner le SELECT natif et donc le support des listes de formulaire ? ~~
+~~TODO : revoir l'implémentation et notamment le comportement sur les appareils tactiles.
+--> abandonner le SELECT natif et donc le support des listes de formulaire ?~~
 
 - navigation au clavier (flèches et autocomplétion)
 - transitions CSS
