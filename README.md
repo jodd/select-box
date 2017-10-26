@@ -1,17 +1,14 @@
-# Elément SELECT customisé
+# Custom selectbox
 
-Un script JS qui reproduit le comportement d'une liste déroulante.
+A customized copy of a native select box.
 
-~~TODO : revoir l'implémentation et notamment le comportement sur les appareils tactiles.
---> abandonner le SELECT natif et donc le support des listes de formulaire ?~~
+- keyboard navigation support
+- smooth CSS effects
+- accessibility support with ARIA attributes
 
-- navigation au clavier (flèches et autocomplétion)
-- transitions CSS
-- attributs ARIA
+[Codepen demo](https://codepen.io/jod/pen/vNryQM)
 
-## [Demo](http://jodd.net/2015/10/30/select-box.html)
-
-## Ressources
+## Resources
 
 - [How to build custom form widgets](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Forms/How_to_build_custom_form_widgets)
 
